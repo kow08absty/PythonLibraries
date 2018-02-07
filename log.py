@@ -26,7 +26,7 @@ class Log:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
         if text:
             text = text + ' '
-        print('{4}{0} Log/W: {1}{2}{3}{5}'.format(Log.getDatetimeStr(), text, Log.getFileInfo(), trbk, ConsoleColors.YELLOW, ConsoleColors.END_CODE))
+        sys.stderr.write('{5}{0} {1}/W: {2}{3}{4}{6}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo(), trbk, ConsoleColors.YELLOW, ConsoleColors.END_CODE))
 
     @staticmethod
     def e(text=''):
@@ -35,25 +35,25 @@ class Log:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
         if text:
             text = text + ' '
-        print('{4}{0} Log/E: {1}{2}{3}{5}'.format(Log.getDatetimeStr(), text, Log.getFileInfo(), trbk, ConsoleColors.RED, ConsoleColors.END_CODE))
+        sys.stderr.write('{5}{0} {1}/E: {2}{3}{4}{6}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo(), trbk, ConsoleColors.RED, ConsoleColors.END_CODE))
 
     @staticmethod
     def i(text=''):
         if text:
             text = text + ' '
-        print('{0} Log/I: {1}{2}'.format(Log.getDatetimeStr(), text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def v(text=''):
         if text:
             text = text + ' '
-        print('{0} Log/V: {1}{2}'.format(Log.getDatetimeStr(), text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/V: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def d(text=''):
         if text:
             text = text + ' '
-        print('{0} Log/D: {1}{2}'.format(Log.getDatetimeStr(), text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/D: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def getFileInfo():
