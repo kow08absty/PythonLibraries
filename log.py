@@ -4,6 +4,7 @@ import sys
 import datetime
 import os
 import re
+from enum import IntEnum
 
 class ConsoleColors:
     RED = '\033[31m'
@@ -17,10 +18,27 @@ class ConsoleColors:
 
 
 class Log:
+    class Level(IntEnum):
+        ALL = -1
+        DEBUG = 0
+        VERBOSE = 1
+        VERB = VERBOSE
+        INFO = 2
+        WARNING = 3
+        WARN = WARNING
+        ERROR = 4
+
     TAG = 'Log'
+    __level__ = Level.ALL
+
+    @staticmethod
+    def set_level(level):
+        Log.__level__ = level
 
     @staticmethod
     def w(text=''):
+        if Log.__level__ >= 0 and Log.__level__ > Log.Level.WARN:
+            return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
@@ -30,6 +48,8 @@ class Log:
 
     @staticmethod
     def e(text=''):
+        if Log.__level__ >= 0 and Log.__level__ > Log.Level.ERROR:
+            return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
@@ -39,21 +59,34 @@ class Log:
 
     @staticmethod
     def i(text=''):
+        if Log.__level__ >= 0 and Log.__level__ > Log.Level.INFO:
+            return
         if text:
             text = text + ' '
+        print(Log.__level__)
         sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def v(text=''):
+        if Log.__level__ >= 0 and Log.__level__ > Log.Level.VERBOSE:
+            return
         if text:
             text = text + ' '
         sys.stderr.write('{0} {1}/V: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def d(text=''):
+        if Log.__level__ >= 0 and Log.__level__ > Log.Level.DEBUG:
+            return
         if text:
             text = text + ' '
         sys.stderr.write('{0} {1}/D: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
+
+    @staticmethod
+    def s(text=''):
+        if text:
+            text = text + ' '
+        sys.stderr.write('{0} {1}/LOG: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
 
     @staticmethod
     def getFileInfo():
