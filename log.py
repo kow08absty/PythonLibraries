@@ -3,8 +3,8 @@ import traceback
 import sys
 import datetime
 import os
-import re
 from enum import IntEnum
+
 
 class ConsoleColors:
     RED = '\033[31m'
@@ -44,7 +44,9 @@ class Log:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
         if text:
             text = text + ' '
-        sys.stderr.write('{5}{0} {1}/W: {2}{3}{4}{6}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo(), trbk, ConsoleColors.YELLOW, ConsoleColors.END_CODE))
+        sys.stderr.write('{5}{0} {1}/W: {2}{3}{4}{6}\n'.format(Log.get_datetime_str(), Log.TAG, text,
+                                                               Log.get_file_info(), trbk, ConsoleColors.YELLOW,
+                                                               ConsoleColors.END_CODE))
 
     @staticmethod
     def e(text=''):
@@ -55,7 +57,9 @@ class Log:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
         if text:
             text = text + ' '
-        sys.stderr.write('{5}{0} {1}/E: {2}{3}{4}{6}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo(), trbk, ConsoleColors.RED, ConsoleColors.END_CODE))
+        sys.stderr.write('{5}{0} {1}/E: {2}{3}{4}{6}\n'.format(Log.get_datetime_str(), Log.TAG, text,
+                                                               Log.get_file_info(), trbk, ConsoleColors.RED,
+                                                               ConsoleColors.END_CODE))
 
     @staticmethod
     def i(text=''):
@@ -64,7 +68,7 @@ class Log:
         if text:
             text = text + ' '
         print(Log.__level__)
-        sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
 
     @staticmethod
     def v(text=''):
@@ -72,7 +76,7 @@ class Log:
             return
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/V: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/V: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
 
     @staticmethod
     def d(text=''):
@@ -80,24 +84,24 @@ class Log:
             return
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/D: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/D: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
 
     @staticmethod
     def s(text=''):
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/LOG: {2}{3}\n'.format(Log.getDatetimeStr(), Log.TAG, text, Log.getFileInfo()))
+        sys.stderr.write('{0} {1}/LOG: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
 
     @staticmethod
-    def getFileInfo():
+    def get_file_info():
         frame = inspect.currentframe().f_back.f_back
-        className = '__main__'
+        class_name = '__main__'
         if 'self' in frame.f_locals:
-            className = frame.f_locals['self'].__class__.__name__
-        return '({0}:{1:d} in {2}#{3})'.format(os.path.basename(frame.f_code.co_filename), frame.f_lineno, className, frame.f_code.co_name)
+            class_name = frame.f_locals['self'].__class__.__name__
+        return '({0}:{1:d} in {2}#{3})'.format(os.path.basename(frame.f_code.co_filename), frame.f_lineno, class_name,
+                                               frame.f_code.co_name)
 
     @staticmethod
-    def getDatetimeStr():
-        nowTime = datetime.datetime.now()
-        return '{0}.{1:03.0f}'.format(nowTime.strftime('%m-%d %H:%M:%S'), int(nowTime.strftime('%f')) / 1000)
-
+    def get_datetime_str():
+        now_time = datetime.datetime.now()
+        return '{0}.{1:03.0f}'.format(now_time.strftime('%m-%d %H:%M:%S'), int(now_time.strftime('%f')) / 1000)
