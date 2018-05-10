@@ -29,15 +29,15 @@ class Log:
         ERROR = 4
 
     TAG = 'Log'
-    __level__ = Level.ALL
+    _level = Level.ALL
 
     @staticmethod
     def set_level(level):
-        Log.__level__ = level
+        Log._level = level
 
     @staticmethod
     def w(text=''):
-        if Log.__level__ >= 0 and Log.__level__ > Log.Level.WARN:
+        if Log._level >= 0 and Log._level > Log.Level.WARN:
             return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
@@ -50,7 +50,7 @@ class Log:
 
     @staticmethod
     def e(text=''):
-        if Log.__level__ >= 0 and Log.__level__ > Log.Level.ERROR:
+        if Log._level >= 0 and Log._level > Log.Level.ERROR:
             return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
@@ -63,16 +63,15 @@ class Log:
 
     @staticmethod
     def i(text=''):
-        if Log.__level__ >= 0 and Log.__level__ > Log.Level.INFO:
+        if Log._level >= 0 and Log._level > Log.Level.INFO:
             return
         if text:
             text = text + ' '
-        print(Log.__level__)
         sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
 
     @staticmethod
     def v(text=''):
-        if Log.__level__ >= 0 and Log.__level__ > Log.Level.VERBOSE:
+        if Log._level >= 0 and Log._level > Log.Level.VERBOSE:
             return
         if text:
             text = text + ' '
@@ -80,7 +79,7 @@ class Log:
 
     @staticmethod
     def d(text=''):
-        if Log.__level__ >= 0 and Log.__level__ > Log.Level.DEBUG:
+        if Log._level >= 0 and Log._level > Log.Level.DEBUG:
             return
         if text:
             text = text + ' '
