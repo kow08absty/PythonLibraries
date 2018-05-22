@@ -25,24 +25,43 @@ class WebDriver(ABC):
     def initialize_driver(self, exec_bin):
         raise NotImplementedError()
 
+    @abstractmethod
+    def restart_driver(self):
+        raise NotImplementedError()
+
     def get_page_source(self, url):
         i = 0
-        while ++i <= 10:
-            time.sleep(5)
+        while i <= 10:
+            if i == 5:
+                Log.v('Restarting driver ...')
+                self.restart_driver()
             try:
                 self._driver.get(url)
             except TimeoutException:
-                Log.w('TimeoutException was raised, retrying #%d' % i)
+                Log.w('from \'%s\', TimeoutException was raised, retrying #%d' % (url, i))
             else:
                 return self._driver.page_source
+            i += 1
+            time.sleep(20)
         Log.e('Retrying failed')
+        with open('error.log', 'a') as f:
+            f.write('{0} E: TimeoutException was raised from url \'{1}\'\n'.format(Log.get_datetime_str(), url))
+        return None
 
-    def close(self):
-        self._driver.close()
+    def quit(self):
+        self._driver.quit()
 
 
 # URLをダウンロードするためのChrome用ライブラリ
 class ChromeDriver(WebDriver):
+    def __init__(self, exec_bin=None):
+        super().__init__(exec_bin)
+        self._chrome_options = None
+
+    def restart_driver(self):
+        self.quit()
+        self._driver = webdriver.Chrome(chrome_options=self._chrome_options)
+
     def initialize_driver(self, exec_bin):
         options = Options()
         options.binary_location = None
@@ -57,11 +76,20 @@ class ChromeDriver(WebDriver):
             "auto detection failed. Please specify chrome binary location"
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
+        self._chrome_options = options
         self._driver = webdriver.Chrome(chrome_options=options)
 
 
 # URLをダウンロードするためのFirefox用ライブラリ
 class FirefoxDriver(WebDriver):
+    def __init__(self, exec_bin=None):
+        super().__init__(exec_bin)
+        self._firefox_binary = None
+
+    def restart_driver(self):
+        self.quit()
+        self._driver = webdriver.Firefox(firefox_binary=self._firefox_binary)
+
     def initialize_driver(self, exec_bin):
         if exec_bin is None:
             if os.name == "posix":
@@ -72,4 +100,5 @@ class FirefoxDriver(WebDriver):
             "auto detection failed. Please specify firefox binary location"
         binary = FirefoxBinary(exec_bin)
         binary.add_command_line_options('-headless')
+        self._firefox_binary = binary
         self._driver = webdriver.Firefox(firefox_binary=binary)
