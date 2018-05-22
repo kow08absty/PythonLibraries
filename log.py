@@ -67,7 +67,8 @@ class Log:
             return
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/I: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
+        sys.stderr.write('{4}{0} {1}/I: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
+                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
 
     @staticmethod
     def v(text=''):
@@ -75,7 +76,8 @@ class Log:
             return
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/V: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
+        sys.stderr.write('{4}{0} {1}/V: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
+                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
 
     @staticmethod
     def d(text=''):
@@ -83,13 +85,15 @@ class Log:
             return
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/D: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
+        sys.stderr.write('{4}{0} {1}/D: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
+                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
 
     @staticmethod
     def s(text=''):
         if text:
             text = text + ' '
-        sys.stderr.write('{0} {1}/LOG: {2}{3}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info()))
+        sys.stderr.write('{4}{0} {1}/LOG: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
+                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
 
     @staticmethod
     def get_file_info():
