@@ -1,7 +1,10 @@
 import os
 import subprocess
+import time
 
 from abc import abstractmethod, ABC
+
+from selenium.common.exceptions import TimeoutException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
@@ -23,8 +26,16 @@ class WebDriver(ABC):
         raise NotImplementedError()
 
     def get_page_source(self, url):
-        self._driver.get(url)
-        return self._driver.page_source
+        i = 0
+        while ++i <= 10:
+            time.sleep(5)
+            try:
+                self._driver.get(url)
+            except TimeoutException:
+                Log.w('TimeoutException was raised, retrying #%d' % i)
+            else:
+                return self._driver.page_source
+        Log.e('Retrying failed')
 
     def close(self):
         self._driver.close()
