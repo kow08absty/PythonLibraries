@@ -79,9 +79,6 @@ class ChromeDriver(WebDriver):
         self._chrome_options = options
         self._driver = webdriver.Chrome(chrome_options=options)
 
-    def close(self):
-        self._driver.close()
-
 
 # URLをダウンロードするためのFirefox用ライブラリ
 class FirefoxDriver(WebDriver):
