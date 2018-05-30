@@ -1,12 +1,14 @@
+import codecs
+import json
 import os
 import subprocess
 import time
 
 from abc import abstractmethod, ABC
 
-from selenium.common.exceptions import TimeoutException
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from .log import Log
@@ -26,17 +28,19 @@ class WebDriver(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def restart_driver(self):
+    def get_status_code(self) -> int:
         raise NotImplementedError()
 
     def get_page_source(self, url):
         i = 0
         while i <= 10:
-            if i == 5:
-                Log.v('Restarting driver ...')
-                self.restart_driver()
             try:
                 self._driver.get(url)
+                if self.get_status_code() != 200:
+                    with codecs.open('error.log', 'a', 'utf_8') as f:
+                        f.write(
+                            '{0} E: Status code was not 200 from url \'{1}\'\n'.format(Log.get_datetime_str(), url))
+                    return None
             except TimeoutException:
                 Log.w('from \'%s\', TimeoutException was raised, retrying #%d' % (url, i))
             else:
@@ -44,7 +48,7 @@ class WebDriver(ABC):
             i += 1
             time.sleep(20)
         Log.e('Retrying failed')
-        with open('error.log', 'a') as f:
+        with codecs.open('error.log', 'a', 'utf_8') as f:
             f.write('{0} E: TimeoutException was raised from url \'{1}\'\n'.format(Log.get_datetime_str(), url))
         return None
 
@@ -54,51 +58,62 @@ class WebDriver(ABC):
 
 # URLをダウンロードするためのChrome用ライブラリ
 class ChromeDriver(WebDriver):
-    def __init__(self, exec_bin=None):
-        super().__init__(exec_bin)
-        self._chrome_options = None
-
-    def restart_driver(self):
-        self.quit()
-        self._driver = webdriver.Chrome(chrome_options=self._chrome_options)
+    def get_status_code(self) -> int:
+        perf_log = self._driver.get_log('performance')
+        for i in range(len(perf_log) - 1, 0, -1):
+            log = json.loads(perf_log[i]['message'])
+            if log['message']['method'] == 'Network.responseReceived':
+                return int(log['message']['params']['response']['status'])
 
     def initialize_driver(self, exec_bin):
-        options = Options()
-        options.binary_location = None
+        options = webdriver.ChromeOptions()
+        options.binary_location = exec_bin
+
         if exec_bin is None:
             if os.name == "posix":
                 options.binary_location = subprocess.getoutput("which chrome")
             elif os.name == "nt":
                 options.binary_location = subprocess.getoutput("where chrome")
-        else:
-            options.binary_location = exec_bin
+
         assert os.path.exists(options.binary_location), \
             "auto detection failed. Please specify chrome binary location"
+
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
-        self._chrome_options = options
-        self._driver = webdriver.Chrome(chrome_options=options)
+        cap = DesiredCapabilities.CHROME
+        cap['loggingPrefs'] = {'performance': 'ALL'}
+        self._driver = webdriver.Chrome(chrome_options=options, desired_capabilities=cap)
 
 
 # URLをダウンロードするためのFirefox用ライブラリ
 class FirefoxDriver(WebDriver):
-    def __init__(self, exec_bin=None):
-        super().__init__(exec_bin)
-        self._firefox_binary = None
-
-    def restart_driver(self):
-        self.quit()
-        self._driver = webdriver.Firefox(firefox_binary=self._firefox_binary)
+    def get_status_code(self) -> int:
+        return 200
+        # TODO: Status code cannot retrieve
+        # perf_log = self._driver.get_log('info')
+        # for i in range(len(perf_log) - 1, 0, -1):
+        #     log = json.loads(perf_log[i]['message'])
+        #     print(json.dumps(log, indent=4))
+        #     if log['message']['method'] == 'Network.responseReceived':
+        #         return int(log['message']['params']['response']['status'])
 
     def initialize_driver(self, exec_bin):
+        options = webdriver.FirefoxOptions()
+        options.binary_location = exec_bin
+
         if exec_bin is None:
             if os.name == "posix":
-                exec_bin = subprocess.getoutput("which firefox")
+                options.binary_location = subprocess.getoutput("which firefox")
             elif os.name == "nt":
-                exec_bin = subprocess.getoutput("where firefox")
-        assert exec_bin is not None and os.path.exists(exec_bin), \
+                options.binary_location = subprocess.getoutput("where firefox")
+
+        assert os.path.exists(options.binary_location), \
             "auto detection failed. Please specify firefox binary location"
-        binary = FirefoxBinary(exec_bin)
-        binary.add_command_line_options('-headless')
-        self._firefox_binary = binary
-        self._driver = webdriver.Firefox(firefox_binary=binary)
+
+        options.add_argument('-headless')
+        options.log.level = 'trace'
+        cap = DesiredCapabilities.FIREFOX
+        cap["marionette"] = True
+        cap['acceptSslCerts'] = True
+        self._driver = webdriver.Firefox(firefox_options=options, desired_capabilities=cap)
+        # self._driver = webdriver.Firefox(firefox_options=options)

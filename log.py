@@ -34,82 +34,127 @@ class Log:
 
     TAG = 'Log'
     _level = Level.ALL
+    _show_full_cls = False
 
-    @staticmethod
-    def set_level(level):
+    @classmethod
+    def set_level(cls, level):
         Log._level = level
 
-    @staticmethod
-    def w(text=''):
+    @classmethod
+    def set_show_full_class_name(cls, b: bool = False):
+        Log._show_full_cls = b
+
+    @classmethod
+    def w(cls, content: object = None):
         if Log._level >= 0 and Log._level > Log.Level.WARN:
             return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
-        if text:
-            text = text + ' '
-        sys.stderr.write('{5}{0} {1}/W: {2}{3}{4}{6}\n'.format(Log.get_datetime_str(), Log.TAG, text,
-                                                               Log.get_file_info(), trbk, ConsoleColors.YELLOW,
-                                                               ConsoleColors.END_CODE))
+        if content:
+            content = '%s ' % content
+        if Log._show_full_cls:
+            class_name = Log.get_full_class_name()
+        else:
+            class_name = Log.get_simple_class_name()
+        sys.stderr.write('{6}{0} {1} {2}/W {3}{4}{5}{7}\n'.format(
+            Log.get_datetime_str(), class_name, Log.TAG, content, Log.get_file_info(), trbk,
+            ConsoleColors.YELLOW, ConsoleColors.END_CODE
+        ))
 
-    @staticmethod
-    def e(text=''):
+    @classmethod
+    def e(cls, content: object = None):
         if Log._level >= 0 and Log._level > Log.Level.ERROR:
             return
         trbk = ''.join(traceback.format_tb(sys.exc_info()[2])).strip()
         if trbk:
             trbk = '\n' + trbk + '\n' + '{0}: {1}'.format(sys.exc_info()[0].__name__, sys.exc_info()[1])
-        if text:
-            text = text + ' '
-        sys.stderr.write('{5}{0} {1}/E: {2}{3}{4}{6}\n'.format(Log.get_datetime_str(), Log.TAG, text,
-                                                               Log.get_file_info(), trbk, ConsoleColors.RED,
-                                                               ConsoleColors.END_CODE))
+        if content:
+            content = '%s ' % content
+        if Log._show_full_cls:
+            class_name = Log.get_full_class_name()
+        else:
+            class_name = Log.get_simple_class_name()
+        sys.stderr.write('{6}{0} {1} {2}/E {3}{4}{5}{7}\n'.format(
+            Log.get_datetime_str(), class_name, Log.TAG, content, Log.get_file_info(), trbk,
+            ConsoleColors.RED, ConsoleColors.END_CODE
+        ))
 
-    @staticmethod
-    def i(text=''):
+    @classmethod
+    def i(cls, content: object = None):
         if Log._level >= 0 and Log._level > Log.Level.INFO:
             return
-        if text:
-            text = text + ' '
-        sys.stderr.write('{4}{0} {1}/I: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
-                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
+        if content:
+            content = '%s ' % content
+        if Log._show_full_cls:
+            class_name = Log.get_full_class_name()
+        else:
+            class_name = Log.get_simple_class_name()
+        sys.stderr.write('{5}{0} {1} {2}/I {3}{4}{6}\n'.format(
+            Log.get_datetime_str(), class_name, Log.TAG, content, Log.get_file_info(),
+            ConsoleColors.WHITE, ConsoleColors.END_CODE
+        ))
 
-    @staticmethod
-    def v(text=''):
+    @classmethod
+    def v(cls, content: object = None):
         if Log._level >= 0 and Log._level > Log.Level.VERBOSE:
             return
-        if text:
-            text = text + ' '
-        sys.stderr.write('{4}{0} {1}/V: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
-                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
+        if content:
+            content = '%s ' % content
+        if Log._show_full_cls:
+            class_name = Log.get_full_class_name()
+        else:
+            class_name = Log.get_simple_class_name()
+        sys.stderr.write('{5}{0} {1} {2}/V {3}{4}{6}\n'.format(
+            Log.get_datetime_str(), class_name, Log.TAG, content, Log.get_file_info(),
+            ConsoleColors.WHITE, ConsoleColors.END_CODE
+        ))
 
-    @staticmethod
-    def d(text=''):
+    @classmethod
+    def d(cls, content: object = None):
         if Log._level >= 0 and Log._level > Log.Level.DEBUG:
             return
-        if text:
-            text = text + ' '
-        sys.stderr.write('{4}{0} {1}/D: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text, Log.get_file_info(),
-                                                            ConsoleColors.WHITE, ConsoleColors.END_CODE))
+        if content:
+            content = '%s ' % content
+        if Log._show_full_cls:
+            class_name = Log.get_full_class_name()
+        else:
+            class_name = Log.get_simple_class_name()
+        sys.stderr.write('{5}{0} {1} {2}/D {3}{4}{6}\n'.format(
+            Log.get_datetime_str(), class_name, Log.TAG, content, Log.get_file_info(),
+            ConsoleColors.WHITE, ConsoleColors.END_CODE
+        ))
 
-    @staticmethod
-    def s(text=''):
-        if text:
-            text = text + ' '
-        sys.stderr.write('{4}{0} {1}/LOG: {2}{3}{5}\n'.format(Log.get_datetime_str(), Log.TAG, text,
-                                                              Log.get_file_info(), ConsoleColors.WHITE,
-                                                              ConsoleColors.END_CODE))
+    @classmethod
+    def get_file_info(cls):
+        caller_frame = inspect.stack()[2][0]
+        return '({0}:{1:d})'.format(os.path.basename(caller_frame.f_code.co_filename), caller_frame.f_lineno)
 
-    @staticmethod
-    def get_file_info():
-        frame = inspect.currentframe().f_back.f_back
-        class_name = '__main__'
-        if 'self' in frame.f_locals:
-            class_name = frame.f_locals['self'].__class__.__name__
-        return '({0}:{1:d} in {2}#{3})'.format(os.path.basename(frame.f_code.co_filename), frame.f_lineno, class_name,
-                                               frame.f_code.co_name)
+    @classmethod
+    def get_full_class_name(cls):
+        caller_frame = inspect.stack()[2][0]
+        class_name = '__main__.'
+        if 'self' in caller_frame.f_locals:
+            class_name = '%s.%s#' % (
+                caller_frame.f_locals['self'].__class__.__module__, caller_frame.f_locals['self'].__class__.__name__
+            )
+        elif 'cls' in caller_frame.f_locals:
+            class_name = '%s.%s.' % (
+                caller_frame.f_locals['cls'].__module__, caller_frame.f_locals['cls'].__name__
+            )
+        return '{0}{1}'.format(class_name, caller_frame.f_code.co_name)
 
-    @staticmethod
-    def get_datetime_str():
+    @classmethod
+    def get_simple_class_name(cls):
+        caller_frame = inspect.stack()[2][0]
+        class_name = '__main__.'
+        if 'self' in caller_frame.f_locals:
+            class_name = '%s#' % caller_frame.f_locals['self'].__class__.__name__
+        elif 'cls' in caller_frame.f_locals:
+            class_name = '%s.' % caller_frame.f_locals['cls'].__name__
+        return '{0}{1}'.format(class_name, caller_frame.f_code.co_name)
+
+    @classmethod
+    def get_datetime_str(cls):
         now_time = datetime.datetime.now()
         return '{0}.{1:03.0f}'.format(now_time.strftime('%m-%d %H:%M:%S'), int(now_time.strftime('%f')) / 1000)
